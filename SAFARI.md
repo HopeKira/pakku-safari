@@ -36,3 +36,16 @@ Manifest 变换位于 `Gruntfile.js`：移除 Chrome 特定最低版本字段、
 - 用户脚本只使用可信示例，确认 Worker 与 WASM 能正常加载。
 
 2026 年 6 月的本机移植曾观察到核心过滤可用及后台通信不稳定；这些历史观察不等于当前版本运行测试，也不能确认 storage 或 background 是根因。本次以独立扩展包构建、重新生成的工程编译和回归测试为证据，不复用旧工程的个人签名与安装状态。
+
+## 构建与 Release 对应的免费测试包
+
+仓库中的 `native/` 包含经整理的宿主及扩展工程。执行：
+
+```sh
+npm ci --ignore-scripts
+sh scripts/build-macos-test.sh
+```
+
+脚本先构建并同步扩展资源，然后以 Release 同时编译 arm64/x86_64，最低构建目标设为 macOS 12。它先为扩展、再为宿主 App 加上 ad-hoc 临时签名并验证，输出 `release/` 中的 ZIP 和 SHA-256。不需要 Apple 账号、证书或公证凭据。
+
+`native/.../Extension/Resources` 为生成目录，不提交源码；同一版本的 TypeScript、资源、锁文件、Grunt 配置与原生工程共同构成对应源码。Release 同步提供完整源码档案与许可证。实际其他系统运行兼容性需另行验证。

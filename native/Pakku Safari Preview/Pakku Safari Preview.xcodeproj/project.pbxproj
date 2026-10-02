@@ -1,0 +1,589 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		955F9B98306F901B00E8072C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955F9B97306F901B00E8072C /* AppDelegate.swift */; };
+		955F9B9C306F901B00E8072C /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 955F9B9A306F901B00E8072C /* Main.html */; };
+		955F9B9E306F901B00E8072C /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 955F9B9D306F901B00E8072C /* Icon.png */; };
+		955F9BA0306F901B00E8072C /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 955F9B9F306F901B00E8072C /* Style.css */; };
+		955F9BA2306F901B00E8072C /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BA1306F901B00E8072C /* Script.js */; };
+		955F9BA4306F901B00E8072C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955F9BA3306F901B00E8072C /* ViewController.swift */; };
+		955F9BA7306F901B00E8072C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BA5306F901B00E8072C /* Main.storyboard */; };
+		955F9BA9306F901D00E8072C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BA8306F901D00E8072C /* Assets.xcassets */; };
+		955F9BB0306F901D00E8072C /* Pakku Safari Preview Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 955F9BAF306F901D00E8072C /* Pakku Safari Preview Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		955F9BB5306F901D00E8072C /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955F9BB4306F901D00E8072C /* SafariWebExtensionHandler.swift */; };
+		955F9BC5306F901D00E8072C /* generated in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BC1306F901D00E8072C /* generated */; };
+		955F9BC6306F901D00E8072C /* page in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BC2306F901D00E8072C /* page */; };
+		955F9BC7306F901D00E8072C /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BC3306F901D00E8072C /* manifest.json */; };
+		955F9BC8306F901D00E8072C /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 955F9BC4306F901D00E8072C /* assets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		955F9BB1306F901D00E8072C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 955F9B8C306F901B00E8072C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 955F9BAE306F901D00E8072C;
+			remoteInfo = "Pakku Safari Preview Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		955F9BBC306F901D00E8072C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				955F9BB0306F901D00E8072C /* Pakku Safari Preview Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		955F9B94306F901B00E8072C /* Pakku Safari Preview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Pakku Safari Preview.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		955F9B97306F901B00E8072C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		955F9B9B306F901B00E8072C /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		955F9B9D306F901B00E8072C /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		955F9B9F306F901B00E8072C /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		955F9BA1306F901B00E8072C /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		955F9BA3306F901B00E8072C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		955F9BA6306F901B00E8072C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		955F9BA8306F901D00E8072C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		955F9BAA306F901D00E8072C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		955F9BAF306F901D00E8072C /* Pakku Safari Preview Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Pakku Safari Preview Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		955F9BB4306F901D00E8072C /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		955F9BB6306F901D00E8072C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		955F9BC1306F901D00E8072C /* generated */ = {isa = PBXFileReference; lastKnownFileType = folder; name = generated; path = Resources/generated; sourceTree = "<group>"; };
+		955F9BC2306F901D00E8072C /* page */ = {isa = PBXFileReference; lastKnownFileType = folder; name = page; path = Resources/page; sourceTree = "<group>"; };
+		955F9BC3306F901D00E8072C /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
+		955F9BC4306F901D00E8072C /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = Resources/assets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		955F9B91306F901B00E8072C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		955F9BAC306F901D00E8072C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		955F9B8B306F901B00E8072C = {
+			isa = PBXGroup;
+			children = (
+				955F9B96306F901B00E8072C /* Pakku Safari Preview */,
+				955F9BB3306F901D00E8072C /* Pakku Safari Preview Extension */,
+				955F9B95306F901B00E8072C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		955F9B95306F901B00E8072C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				955F9B94306F901B00E8072C /* Pakku Safari Preview.app */,
+				955F9BAF306F901D00E8072C /* Pakku Safari Preview Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		955F9B96306F901B00E8072C /* Pakku Safari Preview */ = {
+			isa = PBXGroup;
+			children = (
+				955F9B97306F901B00E8072C /* AppDelegate.swift */,
+				955F9BA3306F901B00E8072C /* ViewController.swift */,
+				955F9BA5306F901B00E8072C /* Main.storyboard */,
+				955F9BA8306F901D00E8072C /* Assets.xcassets */,
+				955F9BAA306F901D00E8072C /* Info.plist */,
+				955F9B99306F901B00E8072C /* Resources */,
+			);
+			path = "Pakku Safari Preview";
+			sourceTree = "<group>";
+		};
+		955F9B99306F901B00E8072C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				955F9B9A306F901B00E8072C /* Main.html */,
+				955F9B9D306F901B00E8072C /* Icon.png */,
+				955F9B9F306F901B00E8072C /* Style.css */,
+				955F9BA1306F901B00E8072C /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		955F9BB3306F901D00E8072C /* Pakku Safari Preview Extension */ = {
+			isa = PBXGroup;
+			children = (
+				955F9BC0306F901D00E8072C /* Resources */,
+				955F9BB4306F901D00E8072C /* SafariWebExtensionHandler.swift */,
+				955F9BB6306F901D00E8072C /* Info.plist */,
+			);
+			path = "Pakku Safari Preview Extension";
+			sourceTree = "<group>";
+		};
+		955F9BC0306F901D00E8072C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				955F9BC1306F901D00E8072C /* generated */,
+				955F9BC2306F901D00E8072C /* page */,
+				955F9BC3306F901D00E8072C /* manifest.json */,
+				955F9BC4306F901D00E8072C /* assets */,
+			);
+			name = Resources;
+			path = "Pakku Safari Preview Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		955F9B93306F901B00E8072C /* Pakku Safari Preview */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 955F9BBD306F901D00E8072C /* Build configuration list for PBXNativeTarget "Pakku Safari Preview" */;
+			buildPhases = (
+				955F9B90306F901B00E8072C /* Sources */,
+				955F9B91306F901B00E8072C /* Frameworks */,
+				955F9B92306F901B00E8072C /* Resources */,
+				955F9BBC306F901D00E8072C /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				955F9BB2306F901D00E8072C /* PBXTargetDependency */,
+			);
+			name = "Pakku Safari Preview";
+			productName = "Pakku Safari Preview";
+			productReference = 955F9B94306F901B00E8072C /* Pakku Safari Preview.app */;
+			productType = "com.apple.product-type.application";
+		};
+		955F9BAE306F901D00E8072C /* Pakku Safari Preview Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 955F9BB9306F901D00E8072C /* Build configuration list for PBXNativeTarget "Pakku Safari Preview Extension" */;
+			buildPhases = (
+				955F9BAB306F901D00E8072C /* Sources */,
+				955F9BAC306F901D00E8072C /* Frameworks */,
+				955F9BAD306F901D00E8072C /* Resources */,
+			);
+			buildRules = (
+			);
+			name = "Pakku Safari Preview Extension";
+			productName = "Pakku Safari Preview Extension";
+			productReference = 955F9BAF306F901D00E8072C /* Pakku Safari Preview Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		955F9B8C306F901B00E8072C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					955F9B93306F901B00E8072C = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					955F9BAE306F901D00E8072C = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = 955F9B8F306F901B00E8072C /* Build configuration list for PBXProject "Pakku Safari Preview" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 955F9B8B306F901B00E8072C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 955F9B95306F901B00E8072C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				955F9B93306F901B00E8072C /* Pakku Safari Preview */,
+				955F9BAE306F901D00E8072C /* Pakku Safari Preview Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		955F9B92306F901B00E8072C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				955F9B9E306F901B00E8072C /* Icon.png in Resources */,
+				955F9BA7306F901B00E8072C /* Main.storyboard in Resources */,
+				955F9BA2306F901B00E8072C /* Script.js in Resources */,
+				955F9B9C306F901B00E8072C /* Main.html in Resources */,
+				955F9BA9306F901D00E8072C /* Assets.xcassets in Resources */,
+				955F9BA0306F901B00E8072C /* Style.css in Resources */,
+			);
+		};
+		955F9BAD306F901D00E8072C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				955F9BC5306F901D00E8072C /* generated in Resources */,
+				955F9BC8306F901D00E8072C /* assets in Resources */,
+				955F9BC7306F901D00E8072C /* manifest.json in Resources */,
+				955F9BC6306F901D00E8072C /* page in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		955F9B90306F901B00E8072C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				955F9BA4306F901B00E8072C /* ViewController.swift in Sources */,
+				955F9B98306F901B00E8072C /* AppDelegate.swift in Sources */,
+			);
+		};
+		955F9BAB306F901D00E8072C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				955F9BB5306F901D00E8072C /* SafariWebExtensionHandler.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		955F9BB2306F901D00E8072C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 955F9BAE306F901D00E8072C /* Pakku Safari Preview Extension */;
+			targetProxy = 955F9BB1306F901D00E8072C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		955F9B9A306F901B00E8072C /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				955F9B9B306F901B00E8072C /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		955F9BA5306F901B00E8072C /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				955F9BA6306F901B00E8072C /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		955F9BB7306F901D00E8072C /* Debug configuration for PBXProject "Pakku Safari Preview" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		955F9BB8306F901D00E8072C /* Release configuration for PBXProject "Pakku Safari Preview" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		955F9BBA306F901D00E8072C /* Debug configuration for PBXNativeTarget "Pakku Safari Preview Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Pakku Safari Preview Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Pakku Safari Preview Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.pakku.safari.preview.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		955F9BBB306F901D00E8072C /* Release configuration for PBXNativeTarget "Pakku Safari Preview Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Pakku Safari Preview Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Pakku Safari Preview Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.pakku.safari.preview.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		955F9BBE306F901D00E8072C /* Debug configuration for PBXNativeTarget "Pakku Safari Preview" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Pakku Safari Preview/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Pakku Safari Preview";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.pakku.safari.preview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		955F9BBF306F901D00E8072C /* Release configuration for PBXNativeTarget "Pakku Safari Preview" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Pakku Safari Preview/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Pakku Safari Preview";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.pakku.safari.preview;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		955F9B8F306F901B00E8072C /* Build configuration list for PBXProject "Pakku Safari Preview" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				955F9BB7306F901D00E8072C /* Debug configuration for PBXProject "Pakku Safari Preview" */,
+				955F9BB8306F901D00E8072C /* Release configuration for PBXProject "Pakku Safari Preview" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		955F9BB9306F901D00E8072C /* Build configuration list for PBXNativeTarget "Pakku Safari Preview Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				955F9BBA306F901D00E8072C /* Debug configuration for PBXNativeTarget "Pakku Safari Preview Extension" */,
+				955F9BBB306F901D00E8072C /* Release configuration for PBXNativeTarget "Pakku Safari Preview Extension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		955F9BBD306F901D00E8072C /* Build configuration list for PBXNativeTarget "Pakku Safari Preview" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				955F9BBE306F901D00E8072C /* Debug configuration for PBXNativeTarget "Pakku Safari Preview" */,
+				955F9BBF306F901D00E8072C /* Release configuration for PBXNativeTarget "Pakku Safari Preview" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 955F9B8C306F901B00E8072C /* Project object */;
+	validationLevel = 1;
+}

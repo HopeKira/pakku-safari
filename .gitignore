@@ -23,3 +23,7 @@ xcuserdata/
 *.p12
 *.mobileprovision
 safari-project/
+
+# Generated native extension resources and test-package outputs
+native/Pakku Safari Preview/Pakku Safari Preview Extension/Resources/
+release/
