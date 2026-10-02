@@ -2,7 +2,7 @@
 
 无需 Xcode、Node.js 或 Apple 开发者会员。下载发布附件 `Pakku-Safari-Preview-macOS-universal.zip`；包含 Apple Silicon 和 Intel 两种架构。
 
-本包使用本地 ad-hoc 临时签名，仅用于二进制完整性；没有 Apple 开发者身份认证或公证，Safari 按未签名扩展测试方式使用。构建最低目标为 macOS 12，Safari Web Extension 功能需要 Safari 15.4 或更新版本；旧系统及其他机器尚未实测，不能保证兼容。
+本包使用本地 ad-hoc 临时签名，仅用于二进制完整性；没有 Apple 开发者身份认证或公证，Safari 按未签名扩展测试方式使用。构建最低目标为 macOS 12，本扩展使用 Manifest V3，需要 Safari 15.4 或更新版本；旧系统及其他机器尚未实测，不能保证兼容。
 
 1. 解压 ZIP，把 `Pakku Safari Preview.app` 拖到“应用程序”。如果已安装过其他 pakku Safari 版本，先在 Safari 中停用旧版，避免两个版本同时处理弹幕。
 2. 打开 App。如果 macOS 因无法验证开发者而阻止打开，在“系统设置 → 隐私与安全性”中，按提示选择此 App 的“仍要打开”。仅在你信任来源并核对下载文件后操作。
@@ -31,3 +31,5 @@ shasum -a 256 Pakku-Safari-Preview-macOS-universal.zip
 卸载时先在 Safari 中关闭扩展，再删除 App；已有扩展配置是否保留由 Safari 管理。
 
 Apple 参考：[测试运行扩展](https://developer.apple.com/documentation/safariservices/running-your-safari-web-extension)、[打开未经公证的 App](https://support.apple.com/102445)。
+
+Manifest V3 版本参考：[WebKit Safari 15.4 说明](https://webkit.org/blog/12445/new-webkit-features-in-safari-15-4/)。

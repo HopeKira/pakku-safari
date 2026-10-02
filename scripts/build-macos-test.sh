@@ -20,6 +20,9 @@ xcodebuild -project "native/Pakku Safari Preview/Pakku Safari Preview.xcodeproj"
   CODE_SIGNING_ALLOWED=NO build
 APP=".security-tools/native-build/Build/Products/Release/Pakku Safari Preview.app"
 EXT="$APP/Contents/PlugIns/Pakku Safari Preview Extension.appex"
+# Remove linker debug records containing local build paths before signing.
+strip -S "$EXT/Contents/MacOS/Pakku Safari Preview Extension"
+strip -S "$APP/Contents/MacOS/Pakku Safari Preview"
 codesign --force --sign - --options runtime --entitlements native/extension.entitlements "$EXT"
 codesign --force --sign - --options runtime --entitlements native/app.entitlements "$APP"
 codesign --verify --deep --strict "$APP"
