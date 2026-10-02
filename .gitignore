@@ -1,0 +1,25 @@
+.vscode/
+.idea/
+node_modules/
+/dist/
+*.log
+TODO.*
+cmake-*
+# Private settings, diagnostics, local build/signing state
+.DS_Store
+.env
+.env.*
+!.env.example
+bugreport*
+*.ips
+*.crash
+.security-tools/
+.security-reports/
+DerivedData/
+*.xcarchive/
+*.app/
+*.appex/
+xcuserdata/
+*.p12
+*.mobileprovision
+safari-project/

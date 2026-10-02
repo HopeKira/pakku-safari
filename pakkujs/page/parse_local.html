@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>pakku :: 处理本地弹幕</title>
+    <style>
+        body {
+            transition: background-color .15s ease-out, opacity .15s ease-out;
+        }
+        .dragged {
+            background-color: #bbf;
+            opacity: .15;
+        }
+        #sandbox {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <fieldset>
+        <legend>格式</legend>
+        <p>
+            输入格式：
+            <label>
+                <input type="radio" name="ingress" value="xml_content" checked>
+                XML
+            </label>
+            <label>
+                <input type="radio" name="ingress" value="debug_content">
+                Debug
+            </label>
+        </p>
+        <p>
+            输出格式：
+            <label>
+                <input type="radio" name="egress" value="xml" checked>
+                XML
+            </label>
+            <label>
+                <input type="radio" name="egress" value="debug">
+                Debug
+            </label>
+            <label>
+                <input type="radio" name="egress" value="debug_peers">
+                Debug(+peers)
+            </label>
+        </p>
+    </fieldset>
+    <fieldset>
+        <legend>结果</legend>
+        <p>
+            <button id="download-btn">全部下载</button>
+            &ensp;
+            <button id="clear-btn">清除已完成</button>
+        </p>
+        <p>
+            <b>请将输入文件拖拽到本页面</b>
+        </p>
+        <div id="result-container"></div>
+    </fieldset>
+
+    <iframe id="sandbox" src="https://www.bilibili.com/robots.txt?pakku_sandbox"></iframe>
+    <script src="/generated/parse_local.js"></script>
+</body>
+</html>
