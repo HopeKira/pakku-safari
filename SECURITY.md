@@ -33,7 +33,7 @@ deepsec shield scan . --layer l2 --no-remote-l3 --format json --output .security
 
 2026-10-02 使用 Gitleaks 8.30.1、Semgrep 1.179.0、DeepSec 0.2.0、npm audit，并人工复核 Manifest、消息桥、XHR/fetch、DOM 输出、Worker/WASM、用户脚本、构建脚本、许可和发布范围。
 
-DeepSec L2 的四项 innerHTML 告警是固定模板或清空容器，未发现攻击者输入进入对应 HTML；L1 未发现命中。Semgrep 的通配 postMessage 告警涉及上游跨页面通信，仍需结合 Safari 实际 origin、source 和 iframe 验证。生成的 protobuf、WASM 二进制及浏览器实际权限边界没有获得完整静态覆盖；未执行模糊测试或完整动态渗透测试。
+DeepSec L2 的四项 innerHTML 告警是固定模板或清空容器，未发现攻击者输入进入对应 HTML；L1 未发现命中。Semgrep 的通配 postMessage 告警涉及上游跨页面通信，仍需结合 Safari 实际 origin、source 和 iframe 验证。Semgrep 对 `options.html` 和 `troubleshooting.html` 报告部分解析警告，不能视为完整覆盖。生成的 protobuf、WASM 二进制及浏览器实际权限边界没有获得完整静态覆盖；未执行模糊测试或完整动态渗透测试。
 
 已知限制：后台失联回退无法可靠遵循用户保存的关闭开关，使用临时标签编号；消息桥对 source/origin 的验证和 URL 正则可进一步收紧；npm audit 仍报告 8 项 high（无 moderate/critical），涉及旧 Grunt 构建依赖。现有信息不足以将这些全部定性为普通网页可利用的高危漏洞，也不能据此宣称没有风险。
 

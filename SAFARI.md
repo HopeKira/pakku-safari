@@ -17,7 +17,7 @@ xcrun safari-web-extension-converter dist/S \
 
 转换器在部分 Xcode 版本中显示为 `safari-web-extension-packager`。如果命令参数不同，以本机 `xcrun safari-web-extension-converter --help` 为准。目标目录应为新目录；不要覆盖已有签名工程。
 
-生成后打开对应 `.xcodeproj`，选择自己的唯一 Bundle Identifier 和签名团队。示例标识用于本机构建预览，不代表可直接分发的签名身份。运行宿主 App，再根据 Safari 扩展设置启用扩展并授权 B 站访问。开发测试可能需要 Safari 的允许未签名扩展选项。
+生成后打开对应 `.xcodeproj`，选择自己的唯一 Bundle Identifier 和签名团队。Xcode 27.0 转换器生成的宿主 App 标识可能与命令参数不同：请确认宿主 App 使用 `com.example.pakku.safari.preview`，扩展使用 `com.example.pakku.safari.preview.Extension`，且宿主页面中的扩展标识也一致。扩展标识必须以宿主 App 标识加点号为前缀，否则原生编译校验会失败。示例标识用于本机构建预览，不代表可直接分发的签名身份。运行宿主 App，再根据 Safari 扩展设置启用扩展并授权 B 站访问。开发测试可能需要 Safari 的允许未签名扩展选项。
 
 `--copy-resources` 复制当时的 `dist/S`；修改 TypeScript 后必须重新构建并重新生成工程，或在 Xcode 中同步更新扩展资源，避免测试旧版本。
 
