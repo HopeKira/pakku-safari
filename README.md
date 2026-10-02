@@ -1,5 +1,7 @@
 # pakku.js Safari 移植
 
+**[下载 Safari 测试安装包（Intel / Apple Silicon）](https://github.com/linyaoyong/pakku-safari/releases/download/v2026.5.1-safari-preview.1/Pakku-Safari-Preview-macOS-universal.zip)** · [全部发布附件](https://github.com/linyaoyong/pakku-safari/releases/tag/v2026.5.1-safari-preview.1) · [安装说明](INSTALL.md)
+
 基于 [xmcp/pakku.js](https://github.com/xmcp/pakku.js) 的 Safari Web Extension 适配项目。pakku 原作提供 B 站弹幕合并、过滤和播放器增强功能；本仓库用于展示我对浏览器扩展跨平台移植的实践。
 
 ## 我的修改
@@ -13,7 +15,7 @@
 
 ## 免编译测试包
 
-GitHub Release 测试附件将提供支持 Apple Silicon 和 Intel 的 App，无需自行编译。它使用免费 ad-hoc 临时签名，未经过 Apple 公证；需要在 Safari 中允许未签名扩展。下载、启用、系统提示及已知限制见 [安装说明](INSTALL.md)。这不是 App Store 或 Developer ID 正式分发包。
+[GitHub Releases](https://github.com/linyaoyong/pakku-safari/releases) 已提供支持 Apple Silicon 和 Intel 的 App，无需自行编译。它使用免费 ad-hoc 临时签名，未经过 Apple 公证；需要在 Safari 中允许未签名扩展。下载、启用、系统提示及已知限制见 [安装说明](INSTALL.md)。这不是 App Store 或 Developer ID 正式分发包。
 
 ## 构建
 
