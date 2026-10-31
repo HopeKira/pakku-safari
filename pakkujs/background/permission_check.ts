@@ -1,5 +1,8 @@
 import Permissions = chrome.permissions.Permissions;
 
+// Safari 不实现 chrome.notifications，直接访问其属性会抛 TypeError
+const HAS_NOTIFICATIONS = typeof chrome !== 'undefined' && !!(chrome as any).notifications;
+
 export function is_permission_buggy(perms: Permissions) {
     let acceptable_domains = [
         '*://*.bilibili.com/*',
@@ -28,16 +31,18 @@ export async function do_fix_permission(already_in_options_page=false, need_brea
     console.log('pakku permission: fix granted:', granted);
 
     if (granted) {
-        chrome.notifications.clear('//perm_hotfix');
-        setTimeout(()=>{
-            // windows may not show immediate notification, so we delay for a bit
-            chrome.notifications.create('//perm_hotfix_done', {
-                type: 'basic',
-                iconUrl: chrome.runtime.getURL('/assets/logo.png'),
-                title: '权限修复成功',
-                message: '您可能需要刷新已经打开的B站页面',
-            });
-        }, 1000);
+        if (HAS_NOTIFICATIONS) {
+            chrome.notifications.clear('//perm_hotfix');
+            setTimeout(()=>{
+                // windows may not show immediate notification, so we delay for a bit
+                chrome.notifications.create('//perm_hotfix_done', {
+                    type: 'basic',
+                    iconUrl: chrome.runtime.getURL('/assets/logo.png'),
+                    title: '权限修复成功',
+                    message: '您可能需要刷新已经打开的B站页面',
+                });
+            }, 1000);
+        }
         void chrome.runtime.sendMessage({type: 'reset_dnr_status'});
     }
     return granted;

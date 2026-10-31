@@ -4,10 +4,18 @@ import {get_state, HAS_SESSION_STORAGE, init_state, save_state} from "./state";
 import {LocalizedConfig} from "../core/types";
 import {is_permission_buggy, do_fix_permission} from './permission_check';
 
+// Safari 不实现 chrome.notifications（转换器会丢弃该权限声明），直接访问其属性
+// 会抛 TypeError 并让整个后台脚本停止执行，弹窗也就永远显示「没有发现播放器」。
+// 所有通知相关调用都先做存在性守卫。
+const HAS_NOTIFICATIONS = typeof chrome !== 'undefined' && !!(chrome as any).notifications;
+
 async function check_fix_permission() {
+    // Safari 对 chrome.permissions 的支持不完整，缺失时直接跳过，避免后台崩溃
+    if (!(chrome as any).permissions?.getAll) return;
+
     let perms = await chrome.permissions.getAll();
 
-    if(is_permission_buggy(perms)) {
+    if(is_permission_buggy(perms) && HAS_NOTIFICATIONS) {
         chrome.notifications.create('//perm_hotfix', {
             type: 'basic',
             iconUrl: chrome.runtime.getURL('/assets/logo.png'),
@@ -25,18 +33,20 @@ async function check_fix_permission() {
     }
 }
 
-chrome.notifications.onClicked.addListener(async function(notif_id) {
-    if(notif_id==='//perm_hotfix') {
-        // xxx: we cannot load config.BREAK_UPDATE here because async breaks user gesture
-        await do_fix_permission(false, true);
-    }
-});
-chrome.notifications.onButtonClicked.addListener(async function(notif_id,btn_idx) {
-    if(notif_id==='//perm_hotfix') {
-        // xxx: we cannot load config.BREAK_UPDATE here because async breaks user gesture
-        await do_fix_permission(false, true);
-    }
-});
+if (HAS_NOTIFICATIONS) {
+    chrome.notifications.onClicked.addListener(async function(notif_id) {
+        if(notif_id==='//perm_hotfix') {
+            // xxx: we cannot load config.BREAK_UPDATE here because async breaks user gesture
+            await do_fix_permission(false, true);
+        }
+    });
+    chrome.notifications.onButtonClicked.addListener(async function(notif_id,btn_idx) {
+        if(notif_id==='//perm_hotfix') {
+            // xxx: we cannot load config.BREAK_UPDATE here because async breaks user gesture
+            await do_fix_permission(false, true);
+        }
+    });
+}
 
 const DEFAULT_BADGE_BGCOLOR = '#26c';
 
@@ -270,18 +280,20 @@ async function handle_command(name: string) {
     if(name==='toggle-global-switch') {
         let new_switch = await toggle_global_switch();
 
-        chrome.notifications.create('//switch', {
-            type: 'basic',
-            iconUrl: chrome.runtime.getURL('assets/logo.png'),
-            title: `[ ${new_switch ? 'ON' : 'OFF'} ]`,
-            message: 'Pakku is ' + (new_switch ? 'ON' : 'OFF'),
-        });
+        if(HAS_NOTIFICATIONS) {
+            chrome.notifications.create('//switch', {
+                type: 'basic',
+                iconUrl: chrome.runtime.getURL('assets/logo.png'),
+                title: `[ ${new_switch ? 'ON' : 'OFF'} ]`,
+                message: 'Pakku is ' + (new_switch ? 'ON' : 'OFF'),
+            });
 
-        if(_clear_timeout)
-            clearTimeout(_clear_timeout);
-        _clear_timeout = setTimeout(function() {
-            chrome.notifications.clear('//switch');
-        }, 1500) as any;
+            if(_clear_timeout)
+                clearTimeout(_clear_timeout);
+            _clear_timeout = setTimeout(function() {
+                chrome.notifications.clear('//switch');
+            }, 1500) as any;
+        }
     }
     else if(name==='show-local') {
         void chrome.tabs.create({url: chrome.runtime.getURL('/page/parse_local.html')});
