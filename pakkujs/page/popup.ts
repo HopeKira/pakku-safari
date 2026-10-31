@@ -34,9 +34,20 @@ let tabid = 0;
 let blacklist_rows: HTMLElement[] = [];
 
 function get_tabid_and_loadui() {
-    chrome.tabs.query({active: true, currentWindow: true}, function(d) {
+    let finish = function(d: chrome.tabs.Tab[], how: string) {
         tabid = d[0]?.id || 0;
+        console.log('pakku popup: tabid=' + tabid + ' via ' + how);
         void loadui();
+    };
+
+    chrome.tabs.query({active: true, currentWindow: true}, function(d) {
+        // Safari 的 popover 可能被当作独立窗口，currentWindow 会查不到标签页
+        if(d && d.length)
+            finish(d, 'currentWindow');
+        else
+            chrome.tabs.query({active: true, lastFocusedWindow: true}, function(d2) {
+                finish(d2 || [], (d2 && d2.length) ? 'lastFocusedWindow' : 'none');
+            });
     });
 }
 
@@ -65,6 +76,10 @@ async function loadui() {
 
     let stats = state[`STATS_${tabid}`];
     if(!stats) {
+        console.log(
+            'pakku popup: no stats for tabid ' + tabid + ', known STATS keys = ' +
+            Object.keys(state).filter(k=>k.startsWith('STATS_')).join(',')
+        );
         hint_text.textContent = general;
         return;
     }

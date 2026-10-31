@@ -1,4 +1,4 @@
-import {Config, DEFAULT_CONFIG, fix_invalid_keys, get_config, migrate_config, save_config} from '../background/config';
+import {Config, DEFAULT_CONFIG, fix_invalid_keys, get_config, get_config_store, migrate_config, save_config} from '../background/config';
 import {do_fix_permission, is_permission_buggy} from '../background/permission_check';
 
 import Permissions = chrome.permissions.Permissions;
@@ -92,7 +92,7 @@ window.addEventListener('hashchange', highlighter);
 id('reset').addEventListener('click', function() {
     if(confirm('确定要重置所有设置吗？\n此操作不可恢复。')) {
         localStorage.clear();
-        chrome.storage.sync.clear(function() {
+        get_config_store().clear(function() {
             if(chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError);
                 alert('设置清空失败');

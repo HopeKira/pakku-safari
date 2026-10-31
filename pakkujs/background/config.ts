@@ -63,6 +63,38 @@ function gen_timestamp() {
 
 export type Config = typeof DEFAULT_CONFIG;
 
+// Safari 不保证实现 storage.sync：可能整个对象缺失，也可能对象在但调用时抛错。
+// 而 get_config() 一旦 reject，后台就会给 content script 回 error，后者随即走
+// fallback、把 tabid 换成 Date.now()，弹窗按真实 tabid 永远查不到统计，
+// 于是恒显示「本页面没有发现B站播放器」。所以这里统一降级到 storage.local。
+let sync_unavailable = false;
+
+function mark_sync_unavailable(e: any) {
+    if(!sync_unavailable) {
+        sync_unavailable = true;
+        console.warn('pakku config: storage.sync 不可用，回落到 storage.local:', '' + e);
+    }
+}
+
+export function get_config_store(): chrome.storage.StorageArea {
+    let sync = (chrome.storage as any).sync;
+    return (sync && !sync_unavailable) ? sync as chrome.storage.StorageArea : chrome.storage.local;
+}
+
+function read_config(store: chrome.storage.StorageArea, resolve: (c: Config)=>void, reject: (e: any)=>void) {
+    store.get((config: AnyObject)=>{
+        if(chrome.runtime.lastError)
+            reject(chrome.runtime.lastError);
+        else {
+            decompress_all(config)
+                .then(config=>{
+                    resolve(migrate_config(config));
+                })
+                .catch(reject);
+        }
+    });
+}
+
 function try_json(s: string, fallback: any): any {
     try {
         return JSON.parse(s);
@@ -199,7 +231,15 @@ export async function save_config<SomeConfig extends Partial<Config>>(config: So
 
     config._LAST_UPDATE_TIME = gen_timestamp();
     try {
-        await chrome.storage.sync.set(await compress_all(config));
+        let store = get_config_store();
+        try {
+            await store.set(await compress_all(config));
+        } catch(e) {
+            if(store===chrome.storage.local)
+                throw e;
+            mark_sync_unavailable(e);
+            await chrome.storage.local.set(await compress_all(config));
+        }
     } catch(e: any) {
         console.error(e);
         return '无法保存设置：' + (e.message || e);
@@ -209,17 +249,26 @@ export async function save_config<SomeConfig extends Partial<Config>>(config: So
 
 export function get_config(): Promise<Config> {
     return new Promise((resolve, reject)=>{
-        chrome.storage.sync.get((config: AnyObject)=>{
-            if(chrome.runtime.lastError)
-                reject(chrome.runtime.lastError);
-            else {
-                decompress_all(config)
-                    .then(config=>{
-                        resolve(migrate_config(config));
-                    })
-                    .catch(reject);
-            }
-        });
+        let store = get_config_store();
+
+        // sync 存在但读取失败时降级重试一次
+        let on_fail = (e: any)=>{
+            if(store!==chrome.storage.local) {
+                mark_sync_unavailable(e);
+                try {
+                    read_config(chrome.storage.local, resolve, reject);
+                } catch(e2) {
+                    reject(e2);
+                }
+            } else
+                reject(e);
+        };
+
+        try {
+            read_config(store, resolve, on_fail);
+        } catch(e) { // e.g. storage.sync is undefined
+            on_fail(e);
+        }
     });
 }
 
@@ -251,7 +300,11 @@ export function hotfix_on_update(config: any) {
     ].filter(k => k in config);
     for(let k of old_keys)
         delete config[k];
-    void chrome.storage.sync.remove(old_keys);
+    try {
+        void get_config_store().remove(old_keys);
+    } catch(e) {
+        mark_sync_unavailable(e);
+    }
 
     // [2024.3.1 - 2024.5.3): config may be broken by mv2 version
     fix_invalid_keys(config);

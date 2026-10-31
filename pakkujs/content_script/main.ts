@@ -81,6 +81,22 @@ function _really_get_local_config(is_pure_env: boolean): Promise<{tabid: int, lo
 
             console.log('pakku diag: fallback DONE, tabid=' + fallback_tabid);
             resolve({ tabid: fallback_tabid, local_config });
+
+            // 后台可能只是启动慢：稍后再问一次，拿到真实 tabid 就换回来，
+            // 否则统计会写到 STATS_<时间戳> 上，弹窗按真实 tabid 永远查不到
+            setTimeout(function() {
+                chrome.runtime.sendMessage({type: 'get_local_config', is_pure_env: is_pure_env}, function(res) {
+                    if(!(res && !res.error && res.result && res.result.tabid))
+                        return;
+                    let old_tabid = tabid;
+                    ({tabid, local_config} = res.result);
+                    if(local_config && local_config.READ_PLAYER_BLACKLIST)
+                        local_config.BLACKLIST.push(...get_player_blacklist());
+                    console.log('pakku diag: adopt real tabid=' + tabid);
+                    if(old_tabid)
+                        void remove_state([`STATS_${old_tabid}`]);
+                });
+            }, 5000);
         };
 
         // Set a timeout: if background doesn't respond, use fallback

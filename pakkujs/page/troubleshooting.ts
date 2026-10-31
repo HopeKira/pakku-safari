@@ -1,4 +1,4 @@
-import {get_config} from '../background/config';
+import {get_config, get_config_store} from '../background/config';
 import {get_state, HAS_SESSION_STORAGE} from '../background/state';
 import {WorkerMaker} from '../core/worker_pool';
 
@@ -49,7 +49,7 @@ get_config().then((config)=>{
 }, (e)=>{
     debug.textContent += '\n\n**Config:** FAILED `' + stringify_error(e) + '`';
 
-    chrome.storage.sync.get((config)=>{
+    get_config_store().get((config)=>{
         if(chrome.runtime.lastError) {
             debug.textContent += '\n\n**Config (storage):** FAILED `' + chrome.runtime.lastError + '`';
         } else {
