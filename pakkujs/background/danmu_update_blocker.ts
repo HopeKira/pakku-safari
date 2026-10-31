@@ -1,4 +1,5 @@
 import {get_config} from "./config";
+import {HAS} from "../core/api_support";
 import Rule = chrome.declarativeNetRequest.Rule;
 
 const RULE = {
@@ -20,6 +21,10 @@ const RULE = {
 } as Rule;
 
 export async function install_dnr_rule() {
+    // Safari 的 declarativeNetRequest 支持不完整，缺失时直接跳过（弹幕更新屏蔽不可用，其余功能不受影响）
+    if(!HAS.declarativeNetRequest)
+        return;
+
     let config = await get_config();
     let enabled = (await chrome.declarativeNetRequest.getDynamicRules()).some(r => r.id===RULE.id);
 

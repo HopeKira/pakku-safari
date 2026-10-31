@@ -1,4 +1,5 @@
 import {Config, DEFAULT_CONFIG, fix_invalid_keys, get_config, get_config_store, migrate_config, save_config} from '../background/config';
+import {HAS} from '../core/api_support';
 import {do_fix_permission, is_permission_buggy} from '../background/permission_check';
 
 import Permissions = chrome.permissions.Permissions;
@@ -180,6 +181,11 @@ for(let elem of document.querySelectorAll('.donate')) {
 
 function get_perms(): Promise<Permissions> {
     return new Promise((resolve)=>{
+        // Safari 可能不实现 permissions API：给一份空权限集，别让整个选项页挂掉
+        if(!HAS.permissions) {
+            resolve({origins: [], permissions: []} as Permissions);
+            return;
+        }
         chrome.permissions.getAll(resolve);
     });
 }
@@ -198,7 +204,8 @@ try {
 
 let perms = await get_perms();
 
-if(is_permission_buggy(perms)) {
+// 权限 API 都没有的话提示修复也没意义（Safari 下 host 权限随安装授予），直接跳过
+if(HAS.permissions && is_permission_buggy(perms)) {
     show_note(
         'permission',
         '需要授权 pakku 访问 bilibili.com 才能正常工作，点击修复权限。',
@@ -225,7 +232,9 @@ function get_ws_permission_and_reload() {
         void reload(true);
     }
 
-    if(perms.origins?.includes('ws://*.bilibili.com/*') && perms.origins?.includes('wss://*.bilibili.com/*')) {
+    if(!HAS.permissions) {
+        done(false);
+    } else if(perms.origins?.includes('ws://*.bilibili.com/*') && perms.origins?.includes('wss://*.bilibili.com/*')) {
         done(true);
     } else {
         chrome.permissions.request({

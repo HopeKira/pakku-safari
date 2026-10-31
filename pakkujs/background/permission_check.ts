@@ -1,7 +1,5 @@
 import Permissions = chrome.permissions.Permissions;
-
-// Safari 不实现 chrome.notifications，直接访问其属性会抛 TypeError
-const HAS_NOTIFICATIONS = typeof chrome !== 'undefined' && !!(chrome as any).notifications;
+import {HAS} from "../core/api_support";
 
 export function is_permission_buggy(perms: Permissions) {
     let acceptable_domains = [
@@ -31,7 +29,7 @@ export async function do_fix_permission(already_in_options_page=false, need_brea
     console.log('pakku permission: fix granted:', granted);
 
     if (granted) {
-        if (HAS_NOTIFICATIONS) {
+        if (HAS.notifications) {
             chrome.notifications.clear('//perm_hotfix');
             setTimeout(()=>{
                 // windows may not show immediate notification, so we delay for a bit

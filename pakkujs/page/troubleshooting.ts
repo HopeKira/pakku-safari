@@ -1,5 +1,6 @@
 import {get_config, get_config_store} from '../background/config';
 import {get_state, HAS_SESSION_STORAGE} from '../background/state';
+import {HAS} from '../core/api_support';
 import {WorkerMaker} from '../core/worker_pool';
 
 let channel = process.env.PAKKU_CHANNEL;
@@ -22,20 +23,29 @@ debug.textContent += '<summary>[Debug Info]</summary>';
 debug.textContent += '\n\n**Version:** ' + chrome.runtime.getManifest().version;
 debug.textContent += '\n\n**Channel:** ' + channel;
 debug.textContent += '\n\n**User Agent:** `' + navigator.userAgent + '`';
-debug.textContent += '\n\n**Incognito:** `' + chrome.extension.inIncognitoContext + '`';
+debug.textContent += '\n\n**Incognito:** `' + (HAS.extension ? chrome.extension.inIncognitoContext : 'N/A (no chrome.extension)') + '`';
 debug.textContent += '\n\n**Has Session Storage:** `' + JSON.stringify(HAS_SESSION_STORAGE) + '`';
 
-chrome.permissions.getAll(function(perms) {
-    debug.textContent += '\n\n**Permissions:** `' + JSON.stringify(perms) + '`';
-});
+// 这个页面本身就是排查工具，缺哪个 API 都不能整页崩掉，所以逐项判存在
+debug.textContent += '\n\n**API:** `' + JSON.stringify(HAS) + '`';
 
-chrome.scripting.getRegisteredContentScripts(function(scripts) {
-    debug.textContent += '\n\n**Content Scripts:** `' + JSON.stringify(scripts) + '`';
-});
+if(HAS.permissions) {
+    chrome.permissions.getAll(function(perms) {
+        debug.textContent += '\n\n**Permissions:** `' + JSON.stringify(perms) + '`';
+    });
+}
 
-chrome.declarativeNetRequest.getDynamicRules(function(rules) {
-    debug.textContent += '\n\n**DNR Rules:** `' + JSON.stringify(rules) + '`';
-});
+if(HAS.scripting) {
+    chrome.scripting.getRegisteredContentScripts(function(scripts) {
+        debug.textContent += '\n\n**Content Scripts:** `' + JSON.stringify(scripts) + '`';
+    });
+}
+
+if(HAS.declarativeNetRequest) {
+    chrome.declarativeNetRequest.getDynamicRules(function(rules) {
+        debug.textContent += '\n\n**DNR Rules:** `' + JSON.stringify(rules) + '`';
+    });
+}
 
 if(navigator.serviceWorker && navigator.serviceWorker.controller) {
     debug.textContent += '\n\n**Service Worker:** `' + navigator.serviceWorker.controller.scriptURL + '` (state: `' + navigator.serviceWorker.controller.state + '`)';
@@ -73,8 +83,10 @@ get_state().then((state)=>{
 });
 
 debug.textContent += '\n\n**Views:**';
-for(let view of chrome.extension.getViews()) {
-    debug.textContent += '\n\n- `' + view.location.href + '`';
+if(HAS.extension) {
+    for(let view of chrome.extension.getViews()) {
+        debug.textContent += '\n\n- `' + view.location.href + '`';
+    }
 }
 
 chrome.tabs.query({}, function(tabs) {

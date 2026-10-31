@@ -1,5 +1,6 @@
 import {get_state} from '../background/state';
 import {get_config} from '../background/config';
+import {HAS} from '../core/api_support';
 
 function id(x: string) {
     return document.getElementById(x) as HTMLElement;
@@ -18,17 +19,19 @@ for(let elem of document.querySelectorAll('a[data-options-link]') as NodeListOf<
 let switch_btn = id('switch');
 let hint_text = id('hint-text');
 
-chrome.commands.getAll(function(cmds) {
-    for(let cmd of cmds) {
-        let elem = id('command-' + cmd.name);
-        if(elem) {
-            elem.textContent = cmd.shortcut || '';
-            elem.onclick = function() {
-                void chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
-            };
+if(HAS.commands) {
+    chrome.commands.getAll(function(cmds) {
+        for(let cmd of cmds) {
+            let elem = id('command-' + cmd.name);
+            if(elem) {
+                elem.textContent = cmd.shortcut || '';
+                elem.onclick = function() {
+                    void chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
+                };
+            }
         }
-    }
-});
+    });
+}
 
 let tabid = 0;
 let blacklist_rows: HTMLElement[] = [];
