@@ -53,9 +53,13 @@ function probe_content_script(): Promise<boolean> {
         // A tab without our content script never calls back, so bound the wait.
         setTimeout(()=>finish(false), 600);
         try {
-            chrome.tabs.sendMessage(tabid, {type: 'ping'}, (res: any) => {
+            // Chrome MV3 may return a Promise here even with a callback; a tab
+            // without our content script rejects it. Swallow that rejection.
+            let maybe_promise: any = chrome.tabs.sendMessage(tabid, {type: 'ping'}, (res: any) => {
                 finish(!!(res && !res.error));
             });
+            if(maybe_promise && typeof maybe_promise.catch === 'function')
+                maybe_promise.catch(()=>finish(false));
         } catch(e) {
             finish(false);
         }
