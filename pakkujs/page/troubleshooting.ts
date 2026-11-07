@@ -1,9 +1,7 @@
-import {get_config, get_config_store} from '../background/config';
+import {get_config} from '../background/config';
 import {get_state, HAS_SESSION_STORAGE} from '../background/state';
 import {HAS} from '../core/api_support';
 import {WorkerMaker} from '../core/worker_pool';
-
-let channel = process.env.PAKKU_CHANNEL;
 
 let debug = document.getElementById('debug')!;
 let error = document.getElementById('error')!;
@@ -21,23 +19,17 @@ window.addEventListener('unhandledrejection', (e)=>{
 
 debug.textContent += '<summary>[Debug Info]</summary>';
 debug.textContent += '\n\n**Version:** ' + chrome.runtime.getManifest().version;
-debug.textContent += '\n\n**Channel:** ' + channel;
+debug.textContent += '\n\n**Channel:** safari';
 debug.textContent += '\n\n**User Agent:** `' + navigator.userAgent + '`';
-debug.textContent += '\n\n**Incognito:** `' + (HAS.extension ? chrome.extension.inIncognitoContext : 'N/A (no chrome.extension)') + '`';
 debug.textContent += '\n\n**Has Session Storage:** `' + JSON.stringify(HAS_SESSION_STORAGE) + '`';
 
-// 这个页面本身就是排查工具，缺哪个 API 都不能整页崩掉，所以逐项判存在
+// This page is itself a diagnostic tool, so a missing API must not break it.
 debug.textContent += '\n\n**API:** `' + JSON.stringify(HAS) + '`';
+debug.textContent += '\n\n**Background:** `persistent background page (no service worker expected)`';
 
 if(HAS.permissions) {
     chrome.permissions.getAll(function(perms) {
         debug.textContent += '\n\n**Permissions:** `' + JSON.stringify(perms) + '`';
-    });
-}
-
-if(HAS.scripting) {
-    chrome.scripting.getRegisteredContentScripts(function(scripts) {
-        debug.textContent += '\n\n**Content Scripts:** `' + JSON.stringify(scripts) + '`';
     });
 }
 
@@ -47,15 +39,8 @@ if(HAS.declarativeNetRequest) {
     });
 }
 
-if(channel === 'safari') {
-    // Safari loads a persistent background page (manifest background.scripts).
-    // Reporting "FAILED" here used to send people chasing a non-existent bug.
-    debug.textContent += '\n\n**Background:** `persistent background page (no service worker expected)`';
-} else if(navigator.serviceWorker && navigator.serviceWorker.controller) {
-    debug.textContent += '\n\n**Service Worker:** `' + navigator.serviceWorker.controller.scriptURL + '` (state: `' + navigator.serviceWorker.controller.state + '`)';
-} else {
-    debug.textContent += '\n\n**Service Worker:** FAILED';
-}
+// Content scripts are declared statically in manifest.json (including
+// world: 'MAIN'), so there is no getRegisteredContentScripts() to query.
 
 debug.textContent += '\n\n**localStorage:** `' + JSON.stringify(localStorage) + '`';
 get_config().then((config)=>{
@@ -63,7 +48,7 @@ get_config().then((config)=>{
 }, (e)=>{
     debug.textContent += '\n\n**Config:** FAILED `' + stringify_error(e) + '`';
 
-    get_config_store().get((config)=>{
+    chrome.storage.local.get((config)=>{
         if(chrome.runtime.lastError) {
             debug.textContent += '\n\n**Config (storage):** FAILED `' + chrome.runtime.lastError + '`';
         } else {
@@ -86,13 +71,6 @@ get_state().then((state)=>{
     });
 });
 
-debug.textContent += '\n\n**Views:**';
-if(HAS.extension) {
-    for(let view of chrome.extension.getViews()) {
-        debug.textContent += '\n\n- `' + view.location.href + '`';
-    }
-}
-
 chrome.tabs.query({}, function(tabs) {
     debug.textContent += '\n\n**Tabs:**';
     for(let tab of tabs) {
@@ -113,18 +91,6 @@ async function test_worker() {
     debug.textContent += '\n\n**Worker is Simulated:** `' + maker.use_simulated + '`';
 }
 void test_worker();
-
-async function get_full_ua() {
-    try {
-        let ua = await (window.navigator as any).userAgentData.getHighEntropyValues(
-            ['architecture', 'bitness', 'model', 'platformVersion', 'fullVersionList']
-        );
-        debug.textContent += '\n\n**Full User Agent:** `' + JSON.stringify(ua) + '`';
-    } catch(e) {
-        // firefox does not support userAgentData
-    }
-}
-void get_full_ua();
 
 (async function() {
     throw new Error('async error log is working');

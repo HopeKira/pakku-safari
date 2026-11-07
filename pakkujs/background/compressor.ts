@@ -171,11 +171,8 @@ async function decompress_str(s: string): Promise<string> {
 // below: compressed object signature
 
 function chrome_stringification_length(s: Uint8Array) {
-    // the '<' character will occupy 6 bytes in the quota in Chrome
+    // the '<' character occupies 6 bytes in the storage quota
     // https://issues.chromium.org/issues/349918278
-
-    if(process.env.PAKKU_CHANNEL==='firefox')
-        return s.length;
 
     let char_count = 0;
     for(let i=0; i<s.length; i++) {

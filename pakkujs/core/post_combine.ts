@@ -41,28 +41,19 @@ function trim_dispstr(text: string): string {
     return text.replace(/([\r\n\t])/g,'').trim();
 }
 
-// \u2080 is subscript_number_0
-const SUBSCRIPT_CHARS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(x => String.fromCharCode(0x2080 + x));
-function to_subscript(x: int): string {
-    let ret = SUBSCRIPT_CHARS[x%10];
-    while(x >= 10) {
-        x = (x/10)|0;
-        ret = SUBSCRIPT_CHARS[x%10] + ret;
-    }
-    return ret;
-}
-
 function make_mark_meta(config: LocalizedConfig): (text: string, cnt: int)=>string {
     const MARK_THRESHOLD = config.MARK_THRESHOLD;
 
     if(config.DANMU_MARK==='off')
         return (text, cnt) => text;
     else { // suffix or prefix
-        let make_cnt: (cnt: int)=>string;
-        if(config.DANMU_SUBSCRIPT)
-            make_cnt = (cnt: int) => `₍${to_subscript(cnt)}₎`;
-        else
-            make_cnt = (cnt: int) => `[x${cnt}]`;
+        // Unicode subscript digits (U+2080..U+2089) are drawn below the baseline.
+        // Safari falls back to a font with a larger descent and B站's fixed-height
+        // danmaku row clips their lower half, so use plain characters instead.
+        // The option still selects between the compact and bracketed format.
+        let make_cnt: (cnt: int)=>string = config.DANMU_SUBSCRIPT ?
+            (cnt: int) => `×${cnt}` :
+            (cnt: int) => `[x${cnt}]`;
 
         return config.DANMU_MARK==='suffix' ?
             (text, cnt) => (
@@ -73,7 +64,9 @@ function make_mark_meta(config: LocalizedConfig): (text: string, cnt: int)=>stri
     }
 }
 
-const SMALL_CHARS = new Set('₍₀₁₂₃₄₅₆₇₈₉₎↓↑');
+// `×N` is the compact mark; count it as a "small char" so dispval() discounts
+// the mark instead of treating it as two full characters of content.
+const SMALL_CHARS = new Set('₍₀₁₂₃₄₅₆₇₈₉₎↓↑×');
 for(let x=0x20; x<=0x7e; x++)
     SMALL_CHARS.add(String.fromCharCode(x));
 

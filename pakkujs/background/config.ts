@@ -63,26 +63,10 @@ function gen_timestamp() {
 
 export type Config = typeof DEFAULT_CONFIG;
 
-// Safari 不保证实现 storage.sync：可能整个对象缺失，也可能对象在但调用时抛错。
-// 而 get_config() 一旦 reject，后台就会给 content script 回 error，后者随即走
-// fallback、把 tabid 换成 Date.now()，弹窗按真实 tabid 永远查不到统计，
-// 于是恒显示「本页面没有发现B站播放器」。所以这里统一降级到 storage.local。
-let sync_unavailable = false;
-
-function mark_sync_unavailable(e: any) {
-    if(!sync_unavailable) {
-        sync_unavailable = true;
-        console.warn('pakku config: storage.sync 不可用，回落到 storage.local:', '' + e);
-    }
-}
-
-export function get_config_store(): chrome.storage.StorageArea {
-    let sync = (chrome.storage as any).sync;
-    return (sync && !sync_unavailable) ? sync as chrome.storage.StorageArea : chrome.storage.local;
-}
-
-function read_config(store: chrome.storage.StorageArea, resolve: (c: Config)=>void, reject: (e: any)=>void) {
-    store.get((config: AnyObject)=>{
+// Safari has no storage.sync. Config lives in storage.local only; there is no
+// cloud store to fall back to and no cross-device sync for a locally built app.
+function read_config(resolve: (c: Config)=>void, reject: (e: any)=>void) {
+    chrome.storage.local.get((config: AnyObject)=>{
         if(chrome.runtime.lastError)
             reject(chrome.runtime.lastError);
         else {
@@ -226,21 +210,12 @@ export function fix_invalid_keys(config: AnyObject) { // may be due to invalid i
 export async function save_config<SomeConfig extends Partial<Config>>(config: SomeConfig): Promise<string|null> {
     if(config._CONFIG_VER!==undefined && config._CONFIG_VER > DEFAULT_CONFIG._CONFIG_VER) {
         console.error('pakku config: refuse to save config with version', config._CONFIG_VER, 'which is higher than', DEFAULT_CONFIG._CONFIG_VER);
-        return '无法保存设置，因为云端设置版本高于本地。请尝试更新 pakku 或者重置所有设置。';
+        return '无法保存设置，因为设置版本高于本地。请尝试更新 pakku 或者重置所有设置。';
     }
 
     config._LAST_UPDATE_TIME = gen_timestamp();
     try {
-        let payload = await compress_all(config);
-        let store = get_config_store();
-        try {
-            await store.set(payload);
-        } catch(e) {
-            if(store===chrome.storage.local)
-                throw e;
-            mark_sync_unavailable(e);
-            await chrome.storage.local.set(payload);
-        }
+        await chrome.storage.local.set(await compress_all(config));
     } catch(e: any) {
         console.error(e);
         return '无法保存设置：' + (e.message || e);
@@ -250,25 +225,10 @@ export async function save_config<SomeConfig extends Partial<Config>>(config: So
 
 export function get_config(): Promise<Config> {
     return new Promise((resolve, reject)=>{
-        let store = get_config_store();
-
-        // sync 存在但读取失败时降级重试一次
-        let on_fail = (e: any)=>{
-            if(store!==chrome.storage.local) {
-                mark_sync_unavailable(e);
-                try {
-                    read_config(chrome.storage.local, resolve, reject);
-                } catch(e2) {
-                    reject(e2);
-                }
-            } else
-                reject(e);
-        };
-
         try {
-            read_config(store, resolve, on_fail);
-        } catch(e) { // e.g. storage.sync is undefined
-            on_fail(e);
+            read_config(resolve, reject);
+        } catch(e) {
+            reject(e);
         }
     });
 }
@@ -301,11 +261,7 @@ export function hotfix_on_update(config: any) {
     ].filter(k => k in config);
     for(let k of old_keys)
         delete config[k];
-    try {
-        void get_config_store().remove(old_keys);
-    } catch(e) {
-        mark_sync_unavailable(e);
-    }
+    void chrome.storage.local.remove(old_keys);
 
     // [2024.3.1 - 2024.5.3): config may be broken by mv2 version
     fix_invalid_keys(config);

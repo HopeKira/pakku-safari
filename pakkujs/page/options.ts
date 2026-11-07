@@ -1,13 +1,4 @@
-import {Config, DEFAULT_CONFIG, fix_invalid_keys, get_config, get_config_store, migrate_config, save_config} from '../background/config';
-import {HAS} from '../core/api_support';
-import {do_fix_permission, is_permission_buggy} from '../background/permission_check';
-
-import Permissions = chrome.permissions.Permissions;
-
-const IS_FIREFOX = process.env.PAKKU_CHANNEL==='firefox';
-const IS_EDG = process.env.PAKKU_CHANNEL==='edg';
-const IS_SAFARI = process.env.PAKKU_CHANNEL==='safari';
-const MIN_CHROME_VERSION = 99; // callback for chrome.runtime.sendMessage
+import {Config, DEFAULT_CONFIG, fix_invalid_keys, get_config, migrate_config, save_config} from '../background/config';
 
 let note_container = id('note-banner-container');
 function show_note(key: string, text: string | null, link: string | (()=>void) | null) {
@@ -34,13 +25,6 @@ function show_note(key: string, text: string | null, link: string | (()=>void) |
     note_container.appendChild(note);
 }
 
-if(!IS_FIREFOX && navigator.userAgent.includes('Firefox/'))
-    show_note(
-        'wrong_channel',
-        '你正在使用 Chrome 分支的 pakku，它在 Firefox 中无法正常工作。\nFirefox 用户请点击前往 Firefox 附加组件中心下载 pakku，然后卸载此版本。',
-        'https://addons.mozilla.org/zh-CN/firefox/addon/pakkujs/',
-    );
-
 function id(x: string): any {
     return document.getElementById(x);
 }
@@ -57,7 +41,7 @@ function try_regexp(x: string) {
 
 let version = 'v' + chrome.runtime.getManifest().version;
 let img_btns: NodeListOf<HTMLElement> = document.querySelectorAll('[data-name]');
-id('version').textContent = version + '_' + (IS_FIREFOX ? 'F' : IS_EDG ? 'E' : IS_SAFARI ? 'S' : 'C');
+id('version').textContent = version + '_S';
 
 function highlighter() {
     if(!location.hash) return;
@@ -94,7 +78,7 @@ window.addEventListener('hashchange', highlighter);
 id('reset').addEventListener('click', function() {
     if(confirm('确定要重置所有设置吗？\n此操作不可恢复。')) {
         localStorage.clear();
-        get_config_store().clear(function() {
+        chrome.storage.local.clear(function() {
             if(chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError);
                 alert('设置清空失败');
@@ -107,80 +91,10 @@ id('reset').addEventListener('click', function() {
     }
 });
 
-let ask_review_link = id('ask-review-link');
-if(IS_FIREFOX) {
-    ask_review_link.href = 'https://addons.mozilla.org/zh-CN/firefox/addon/pakkujs/reviews/';
-    ask_review_link.textContent = 'Mozilla Add-ons 网站';
-}
-if(IS_EDG) {
-    ask_review_link.href = 'https://microsoftedge.microsoft.com/addons/detail/pakku%EF%BC%9A%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%BC%B9%E5%B9%95%E8%BF%87%E6%BB%A4%E5%99%A8/lnfcfeidnipnphibahlkdhalpkpmccoc';
-    ask_review_link.textContent = 'Microsoft Edge 加载项网站';
-}
-if(IS_SAFARI) {
-    // Locally built Safari extension has no store listing to review.
-    ask_review_link.style.display = 'none';
-}
-
-// version check
-async function ver_check() {
-    // Safari builds are compiled locally: there is no Chrome/Firefox store listing
-    // to poll, no Chromium version to warn about, and no auto-update channel.
-    if(IS_SAFARI) {
-        id('version-checker').textContent = 'Safari 本地构建';
-        return;
-    }
-
-    let chrome_ver_match = navigator.userAgent.match(/Chrome\/(\d+)/);
-    let chrome_ver = chrome_ver_match ? parseInt(chrome_ver_match[1]) : null;
-
-    if(!IS_FIREFOX && chrome_ver && chrome_ver<MIN_CHROME_VERSION) {
-        show_note(
-            'browser_version',
-            `你的浏览器内核版本太低（实为 ${chrome_ver}，需要 ≥${MIN_CHROME_VERSION}），部分功能不可用。请更新浏览器。`,
-            'https://www.google.cn/chrome/',
-        );
-    }
-
-    if(IS_EDG) {
-        console.log('version checking disabled for edg');
-        return;
-    }
-
-    let res = await fetch(
-        IS_FIREFOX ?
-            'https://img.shields.io/amo/v/pakkujs.json' :
-            'https://img.shields.io/chrome-web-store/v/jklfcpboamajpiikgkbjcnnnnooefbhh.json',
-    );
-    let latest_ver = await res.json();
-
-    console.log('latest version ', latest_ver);
-    if(latest_ver.value.charAt(0) === 'v') {
-        if(latest_ver.value !== version) {
-            let update_url = 'https://s.xmcp.ltd/pakkujs/?src=update_banner&from_version=' + encodeURIComponent(version);
-            show_note(
-                'pakku_version',
-                `你正在使用 pakku ${version}，${latest_ver.name} 中的最新版是 ${latest_ver.value}。点击此处下载新版本。`,
-                update_url,
-            );
-
-            // let the browser to auto update
-            if(chrome.runtime.requestUpdateCheck) {
-                chrome.runtime.requestUpdateCheck((status, details)=>{
-                    console.log('request update check ', status, details);
-                    if(status === 'update_available')
-                        show_note(
-                            'pakku_version',
-                            `你正在使用 pakku ${version}。重启浏览器来自动更新到 ${details?.version || '新版本'}，或者点击此处手动下载。`,
-                            update_url,
-                        );
-                });
-            }
-        }  else {
-            id('version-checker').textContent = '✓ 是最新版本';
-        }
-    }
-}
-void ver_check();
+// Safari builds are compiled locally: no store listing to review, no store
+// version feed to poll and no auto-update channel.
+id('ask-review-link').style.display = 'none';
+id('version-checker').textContent = 'Safari 本地构建';
 
 for(let elem of document.querySelectorAll('.donate')) {
     elem.addEventListener('mouseover', function() {
@@ -188,17 +102,6 @@ for(let elem of document.querySelectorAll('.donate')) {
     });
     elem.addEventListener('mouseout', function() {
         document.body.classList.remove('donate-show');
-    });
-}
-
-function get_perms(): Promise<Permissions> {
-    return new Promise((resolve)=>{
-        // Safari 可能不实现 permissions API：给一份空权限集，别让整个选项页挂掉
-        if(!HAS.permissions) {
-            resolve({origins: [], permissions: []} as Permissions);
-            return;
-        }
-        chrome.permissions.getAll(resolve);
     });
 }
 
@@ -214,47 +117,10 @@ try {
     throw e;
 }
 
-let perms = await get_perms();
-
-// 权限 API 都没有的话提示修复也没意义（Safari 下 host 权限随安装授予），直接跳过
-if(HAS.permissions && is_permission_buggy(perms)) {
-    show_note(
-        'permission',
-        '需要授权 pakku 访问 bilibili.com 才能正常工作，点击修复权限。',
-        function() {
-            // xxx: cannot use async here, https://bugzilla.mozilla.org/show_bug.cgi?id=1398833
-            do_fix_permission(true, config.BREAK_UPDATE)
-                .then((granted)=>{
-                    if(granted) {
-                        show_note('permission', null, null);
-                        chrome.permissions.getAll().then((p)=>{perms = p;});
-                    }
-                });
-        },
-    );
-}
-
 function get_ws_permission_and_reload() {
-    function done(granted: boolean) {
-        if(!granted) {
-            config.BREAK_UPDATE = false;
-            // noinspection ES6MissingAwait
-            alert('权限不足或者您的浏览器不支持此功能');
-        }
-        void reload(true);
-    }
-
-    if(!HAS.permissions) {
-        done(false);
-    } else if(perms.origins?.includes('ws://*.bilibili.com/*') && perms.origins?.includes('wss://*.bilibili.com/*')) {
-        done(true);
-    } else {
-        chrome.permissions.request({
-            origins: ['ws://*.bilibili.com/*', 'wss://*.bilibili.com/*'],
-        }, (granted)=>{
-            done(granted);
-        });
-    }
+    // ws/wss origins are declared in manifest host_permissions, so Safari grants
+    // them when the extension is enabled. No runtime permission request needed.
+    void reload(true);
 }
 
 async function try_save_config(config: Config) {

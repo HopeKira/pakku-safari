@@ -9,28 +9,22 @@
         "48": "assets/logo_48.png"
     },
     "author": "xmcp",
-    
+
     "manifest_version": 3,
-    "minimum_chrome_version": "94",
-    
+
     "permissions": [
-        "notifications",
         "storage",
         "contextMenus",
-        "scripting",
-        "declarativeNetRequestWithHostAccess"
+        "declarativeNetRequest"
     ],
     "host_permissions": [
-        "*://*.bilibili.com/*"
-    ],
-    "optional_host_permissions": [
+        "*://*.bilibili.com/*",
         "ws://*.bilibili.com/*",
         "wss://*.bilibili.com/*"
     ],
 
     "options_ui": {
-        "page": "page/options.html",
-        "open_in_tab": true
+        "page": "page/options.html"
     },
     "action": {
         "default_icon": "assets/icon_display.png",
@@ -54,9 +48,9 @@
             "description": "打开对话框"
         }
     },
-    
+
     "background": {
-        "service_worker": "generated/background.js"
+        "scripts": ["generated/background.js"]
     },
     "content_scripts": [
         {
@@ -71,11 +65,30 @@
             "js": ["/generated/content_script.js"],
             "run_at": "document_start",
             "all_frames": true
+        },
+        {
+            "matches": ["*://*.bilibili.com/*"],
+            "exclude_matches": [
+                "https://www.bilibili.com/robots.txt?pakku_sandbox",
+                "https://message.bilibili.com/*"
+            ],
+            "js": ["/generated/xhr_hook.js"],
+            "run_at": "document_start",
+            "world": "MAIN"
+        },
+        {
+            "matches": ["*://*.bilibili.com/*"],
+            "exclude_matches": [
+                "https://www.bilibili.com/robots.txt?pakku_sandbox",
+                "https://message.bilibili.com/*"
+            ],
+            "css": ["/generated/injected.css"],
+            "run_at": "document_start"
         }
     ],
 
     "web_accessible_resources": [{
-        "resources": ["/generated/combine_worker.js", "/generated/xhr_hook.js", "/assets/similarity-gen.wasm"],
+        "resources": ["/generated/combine_worker.js", "/assets/similarity-gen.wasm"],
         "matches": ["*://*.bilibili.com/*"]
     }]
 }

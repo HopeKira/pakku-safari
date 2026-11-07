@@ -2,56 +2,11 @@ import {install_dnr_rule} from "./danmu_update_blocker";
 import {get_config, hotfix_on_update, save_config} from "./config";
 import {get_state, HAS_SESSION_STORAGE, init_state, save_state, reset_state_store} from "./state";
 import {LocalizedConfig} from "../core/types";
-import {is_permission_buggy, do_fix_permission} from './permission_check';
-
 import {HAS} from '../core/api_support';
 
-// Safari 不实现 chrome.notifications；Safari manifest 里也已不再声明该权限。
-// 直接访问缺失命名空间的属性会抛 TypeError 并中断整个后台脚本，
-// 所以通知相关调用统一走 HAS.notifications 守卫。
-
-const IS_SAFARI = process.env.PAKKU_CHANNEL==='safari';
-
-async function check_fix_permission() {
-    // Safari 在授予扩展时就按 manifest 的 host_permissions 授权，没有 Chrome 那套
-    // 可选的 host 权限修复流程；notifications 也不存在，提示根本发不出来。
-    // 整段在 Safari 构建里会被 rollup/terser 摇掉，不必运行时空转。
-    if (IS_SAFARI || !HAS.permissions) return;
-
-    let perms = await chrome.permissions.getAll();
-
-    if(is_permission_buggy(perms) && HAS.notifications) {
-        chrome.notifications.create('//perm_hotfix', {
-            type: 'basic',
-            iconUrl: chrome.runtime.getURL('/assets/logo.png'),
-            title: '请授予pakku权限',
-            message: 'pakku目前没有修改弹幕所需的权限，无法正常工作。点击修复权限。',
-
-            // xxx: firefox does not support requireInteraction and buttons
-            ...process.env.PAKKU_CHANNEL==='firefox' ? {} : {
-                requireInteraction: true,
-                buttons: [
-                    {title: '立即修复'},
-                ],
-            },
-        });
-    }
-}
-
-if (HAS.notifications) {
-    chrome.notifications.onClicked.addListener(async function(notif_id) {
-        if(notif_id==='//perm_hotfix') {
-            // xxx: we cannot load config.BREAK_UPDATE here because async breaks user gesture
-            await do_fix_permission(false, true);
-        }
-    });
-    chrome.notifications.onButtonClicked.addListener(async function(notif_id,btn_idx) {
-        if(notif_id==='//perm_hotfix') {
-            // xxx: we cannot load config.BREAK_UPDATE here because async breaks user gesture
-            await do_fix_permission(false, true);
-        }
-    });
-}
+// Safari-only background page. chrome.notifications does not exist on Safari, so
+// there is no permission-repair prompt or ON/OFF toast here; state is reflected
+// by the toolbar badge and the popup instead.
 
 const DEFAULT_BADGE_BGCOLOR = '#26c';
 
@@ -59,7 +14,7 @@ async function reset_badge() {
     // reset badge options because options during the previous launch might not be cleared away
     await chrome.action.setBadgeText({text: ''});
     await chrome.action.setBadgeBackgroundColor({color: DEFAULT_BADGE_BGCOLOR});
-    if(chrome.action.setBadgeTextColor)
+    if(HAS.setBadgeTextColor)
         await chrome.action.setBadgeTextColor({color: 'white'});
 }
 
@@ -81,53 +36,10 @@ async function install_context_menu() {
     });
 }
 
-async function install_content_script() {
-    // Safari 18+ supports content_scripts[].world='MAIN' natively: xhr_hook.js is
-    // declared statically in the Safari manifest (see safari_manifest in Gruntfile.js).
-    // No runtime registration (and no scripting permission requirement) is needed.
-    if(IS_SAFARI)
-        return;
-
-    let installed = await chrome.scripting.getRegisteredContentScripts({
-        ids: ['pakku-ajax'],
-    });
-    if(installed.length>0)
-        return;
-
-    let shared_args = {
-        id: 'pakku-ajax',
-        allFrames: true,
-        matches: ['*://*.bilibili.com/*'],
-        excludeMatches: [
-            'https://www.bilibili.com/robots.txt?pakku_sandbox', // no need and may cause var name conflict
-            'https://message.bilibili.com/*', // no need and may reduce performance due to iframes in the player page
-        ],
-        css: ['/generated/injected.css'],
-        runAt: 'document_start' as 'document_start',
-    };
-
-    try {
-        await chrome.scripting.registerContentScripts([{
-            ...shared_args,
-            js: ['/generated/xhr_hook.js'],
-            world: 'MAIN',
-        }]);
-        console.log('pakku ajax: installed content script');
-    } catch(e) { // no `world` arg for firefox and chrome <102
-        await chrome.scripting.registerContentScripts([{
-            ...shared_args,
-            js: ['/assets/xhr_hook_injector.js'],
-        }]);
-        console.log('pakku ajax: installed content script (FALLBACK)');
-    }
-}
-
 async function perform_init() {
     let is_init = await init_state();
-    if(is_init) {
+    if(is_init)
         await reset_badge();
-        await check_fix_permission();
-    }
 }
 void perform_init();
 
@@ -144,13 +56,9 @@ async function toggle_global_switch() {
     chrome.runtime.sendMessage({type: 'reload_popup_state', tabid: null})
         .catch(()=>{});
     let cur_tabid = (await chrome.tabs.query({active: true, currentWindow: true}))[0]?.id || null;
-    // Safari only exposes tab.url with the "tabs" permission; without it the
-    // url-based filter silently skipped every tab, so toggling the global switch
-    // never refreshed open B站 pages. sendMessage to a tab without our content
-    // script simply rejects and is ignored. Other channels keep their filter.
+    // Safari does not expose tab.url without the "tabs" permission. Sending to
+    // tabs without our content script simply rejects and is ignored.
     for(let tab of await chrome.tabs.query({})) {
-        if(!IS_SAFARI && !tab.url?.includes('bilibili.com/'))
-            continue;
         chrome.tabs.sendMessage(tab.id!, {type: 'reload_danmu', key: new_switch ? 2 : 1, trigger_player: (tab.id===cur_tabid)})
             .catch(()=>{});
     }
@@ -159,12 +67,11 @@ async function toggle_global_switch() {
 }
 
 function install_declarative_stuff() {
-    // best practice to re-install all declarative stuff on every startup
-    // https://groups.google.com/a/chromium.org/g/chromium-extensions/c/ZM0Vzb_vuIs/m/Nm4gK-X0AQAJ
-
+    // re-install declarative stuff on every startup
     void install_dnr_rule();
     void install_context_menu();
-    void install_content_script();
+    // xhr_hook.js and injected.css are declared statically in manifest.json
+    // (world: 'MAIN' is supported by Safari 18+), so no scripting registration.
 }
 
 chrome.runtime.onStartup.addListener(async ()=>{
@@ -244,7 +151,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         chrome.action.setBadgeText({
             tabId: msg.tabid,
             text: msg.text,
-        }) // will fail in earlier chrome versions if text is null: https://issues.chromium.org/issues/40858508
+        })
             .then(()=>
                 chrome.action.setBadgeBackgroundColor({
                     tabId: msg.tabid,
@@ -290,39 +197,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
 });
 
-async function handle_command(name: string) {
+function handle_command(name: string) {
     if(name==='toggle-global-switch') {
-        let new_switch = await toggle_global_switch();
-
-        if(HAS.notifications) {
-            chrome.notifications.create('//switch', {
-                type: 'basic',
-                iconUrl: chrome.runtime.getURL('assets/logo.png'),
-                title: `[ ${new_switch ? 'ON' : 'OFF'} ]`,
-                message: 'Pakku is ' + (new_switch ? 'ON' : 'OFF'),
-            });
-
-            if(_clear_timeout)
-                clearTimeout(_clear_timeout);
-            _clear_timeout = setTimeout(function() {
-                chrome.notifications.clear('//switch');
-            }, 1500) as any;
-        }
+        void toggle_global_switch();
     }
     else if(name==='show-local') {
         void chrome.tabs.create({url: chrome.runtime.getURL('/page/parse_local.html')});
     }
 }
 
-let _clear_timeout: number | null = null;
 if(HAS.commands) {
     chrome.commands.onCommand.addListener(function(name) {
-        void handle_command(name);
+        handle_command(name);
     });
 }
 
 if(HAS.contextMenus) {
-    chrome.contextMenus.onClicked.addListener(async function(info, tab) {
-        void handle_command(info.menuItemId as string);
+    chrome.contextMenus.onClicked.addListener(function(info, tab) {
+        handle_command(info.menuItemId as string);
     });
 }

@@ -149,14 +149,6 @@ export async function protoapi_get_view(view_response: Promise<ArrayBuffer>): Pr
     let buffer = await view_response;
     let arr = new Uint8Array(buffer);
 
-    if(process.env.PAKKU_CHANNEL==='firefox') {
-        // have to clone this uint8array otherwise `arr instanceof Uint8Array` will be false
-        // https://medium.com/@simonwarta/limitations-of-the-instanceof-operator-f4bcdbe7a400
-        let arr2 = new Uint8Array(arr.byteLength);
-        arr2.set(arr);
-        arr = arr2;
-    }
-
     return proto_view.decode(arr);
 }
 
@@ -178,14 +170,6 @@ async function protoapi_get_url(url: string): Promise<proto_seg> {
     let res = await fetch(url, {credentials: 'include'});
     let buffer = await res.arrayBuffer();
     let arr = new Uint8Array(buffer);
-
-    if(process.env.PAKKU_CHANNEL==='firefox') {
-        // have to clone this uint8array otherwise `arr instanceof Uint8Array` will be false
-        // https://medium.com/@simonwarta/limitations-of-the-instanceof-operator-f4bcdbe7a400
-        let arr2 = new Uint8Array(arr.byteLength);
-        arr2.set(arr);
-        arr = arr2;
-    }
 
     return proto_seg.decode(arr);
 }
