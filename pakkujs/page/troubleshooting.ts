@@ -47,7 +47,11 @@ if(HAS.declarativeNetRequest) {
     });
 }
 
-if(navigator.serviceWorker && navigator.serviceWorker.controller) {
+if(channel === 'safari') {
+    // Safari loads a persistent background page (manifest background.scripts).
+    // Reporting "FAILED" here used to send people chasing a non-existent bug.
+    debug.textContent += '\n\n**Background:** `persistent background page (no service worker expected)`';
+} else if(navigator.serviceWorker && navigator.serviceWorker.controller) {
     debug.textContent += '\n\n**Service Worker:** `' + navigator.serviceWorker.controller.scriptURL + '` (state: `' + navigator.serviceWorker.controller.state + '`)';
 } else {
     debug.textContent += '\n\n**Service Worker:** FAILED';

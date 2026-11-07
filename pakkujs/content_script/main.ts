@@ -60,67 +60,51 @@ let local_config: null | LocalizedConfig = null;
 let unreg_userscript = true;
 
 function _really_get_local_config(is_pure_env: boolean): Promise<{tabid: int, local_config: LocalizedConfig}> {
-    return new Promise((resolve, reject) => {
-        let resolved = false;
+    return new Promise((resolve) => {
+        let settled = false;
 
-        // Fallback: use public defaults when the Safari background cannot respond
+        // Safari runs a persistent background page, so this is only a safety net
+        // against a background that failed to start. tabid 0 means "unknown":
+        // core/types.ts skips writing STATS/badge for it, so the popup can never
+        // pick up a stale or mismatched stats entry (previously a Date.now()
+        // fallback tabid made the popup permanently report "no player found").
         let do_fallback = () => {
-            if(resolved) return;
-            resolved = true;
-            console.log('pakku diag: fallback START');
-
-            let fallback_tabid: int = Date.now();
-            let local_config: LocalizedConfig = {
-                // Keep mutable arrays independent of the public defaults.
-                ...JSON.parse(JSON.stringify(DEFAULT_CONFIG)),
-                READ_PLAYER_BLACKLIST: !is_pure_env,
-                BLACKLIST: [],
-                GLOBAL_SWITCH: true,
-                SKIP_INJECT: is_pure_env,
-            } as LocalizedConfig;
-
-            console.log('pakku diag: fallback DONE, tabid=' + fallback_tabid);
-            resolve({ tabid: fallback_tabid, local_config });
-
-            // 后台可能只是启动慢：稍后再问一次，拿到真实 tabid 就换回来，
-            // 否则统计会写到 STATS_<时间戳> 上，弹窗按真实 tabid 永远查不到
-            setTimeout(function() {
-                chrome.runtime.sendMessage({type: 'get_local_config', is_pure_env: is_pure_env}, function(res) {
-                    if(!(res && !res.error && res.result && res.result.tabid))
-                        return;
-                    let old_tabid = tabid;
-                    ({tabid, local_config} = res.result);
-                    if(local_config && local_config.READ_PLAYER_BLACKLIST)
-                        local_config.BLACKLIST.push(...get_player_blacklist());
-                    console.log('pakku diag: adopt real tabid=' + tabid);
-                    if(old_tabid)
-                        void remove_state([`STATS_${old_tabid}`]);
-                });
-            }, 5000);
+            if(settled) return;
+            settled = true;
+            console.warn('pakku injected: background unavailable, using public defaults');
+            resolve({
+                tabid: 0,
+                local_config: {
+                    // Keep mutable arrays independent of the public defaults.
+                    ...JSON.parse(JSON.stringify(DEFAULT_CONFIG)),
+                    READ_PLAYER_BLACKLIST: !is_pure_env,
+                    BLACKLIST: [],
+                    GLOBAL_SWITCH: true,
+                    SKIP_INJECT: is_pure_env,
+                } as LocalizedConfig,
+            });
         };
 
-        // Set a timeout: if background doesn't respond, use fallback
         let timer = setTimeout(do_fallback, 2000);
-
-        chrome.runtime.sendMessage({
-            type: 'get_local_config',
-            is_pure_env: is_pure_env,
-        }, (res)=>{
-            if(resolved) return;
+        try {
+            chrome.runtime.sendMessage({
+                type: 'get_local_config',
+                is_pure_env: is_pure_env,
+            }, (res)=>{
+                if(settled) return;
+                clearTimeout(timer);
+                if(res && !res.error && res.result && res.result.tabid) {
+                    settled = true;
+                    resolve(res.result);
+                } else {
+                    console.warn('pakku injected: bad background response', res && res.error);
+                    do_fallback();
+                }
+            });
+        } catch(e) {
             clearTimeout(timer);
-
-            if(res && !res.error) {
-                resolved = true;
-                resolve(res.result);
-            } else if(res && res.error) {
-                console.warn('pakku injected: background config failed, using fallback:', res.error);
-                do_fallback();
-            } else {
-                // Safari may call callback with undefined if background didn't respond properly
-                console.warn('pakku injected: no background response, using fallback');
-                do_fallback();
-            }
-        });
+            do_fallback();
+        }
     });
 }
 
@@ -131,8 +115,10 @@ async function get_local_config(is_pure_env: boolean = false): Promise<Localized
         if(local_config.READ_PLAYER_BLACKLIST)
             local_config.BLACKLIST.push(...get_player_blacklist());
 
-        // storage cleanup
+        // storage cleanup (skip entirely when tabid is unknown)
         window.onbeforeunload = function() {
+            if(!tabid) return;
+
             if(unreg_userscript)
                 void remove_state([`STATS_${tabid}`, `USERSCRIPT_${tabid}`]);
             else

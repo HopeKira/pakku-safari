@@ -50,6 +50,21 @@ export async function remove_state(keys: (keyof State)[]) {
     await store.remove(keys);
 }
 
+// When storage.session is unavailable we emulate it with storage.local. On Safari
+// the config also falls back to storage.local (there is no storage.sync), so a
+// blanket local.clear() would silently wipe the user's saved settings on every
+// browser start. Only remove the keys this module owns.
+export async function reset_state_store() {
+    let store = chrome.storage.local;
+    let all = await store.get(null);
+    let state_keys = Object.keys(all).filter(k =>
+        k==='_INITIALIZED' || k==='GLOBAL_SWITCH' ||
+        k.startsWith('STATS_') || k.startsWith('USERSCRIPT_')
+    );
+    if(state_keys.length)
+        await store.remove(state_keys);
+}
+
 export function get_state(): Promise<State> {
     return new Promise((resolve, reject)=>{
         let store = HAS_SESSION_STORAGE ? chrome.storage.session : chrome.storage.local;

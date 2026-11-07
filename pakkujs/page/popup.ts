@@ -2,6 +2,8 @@ import {get_state} from '../background/state';
 import {get_config} from '../background/config';
 import {HAS} from '../core/api_support';
 
+const IS_SAFARI = process.env.PAKKU_CHANNEL==='safari';
+
 function id(x: string) {
     return document.getElementById(x) as HTMLElement;
 }
@@ -25,9 +27,15 @@ if(HAS.commands) {
             let elem = id('command-' + cmd.name);
             if(elem) {
                 elem.textContent = cmd.shortcut || '';
-                elem.onclick = function() {
-                    void chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
-                };
+                if(IS_SAFARI) {
+                    // Safari has no chrome://extensions/shortcuts. Shortcuts live in
+                    // Safari Settings → Extensions, which cannot be opened by URL.
+                    elem.title = '在 Safari 设置 → 扩展 中修改快捷键';
+                } else {
+                    elem.onclick = function() {
+                        void chrome.tabs.create({url: 'chrome://extensions/shortcuts'});
+                    };
+                }
             }
         }
     });
@@ -35,6 +43,24 @@ if(HAS.commands) {
 
 let tabid = 0;
 let blacklist_rows: HTMLElement[] = [];
+
+function probe_content_script(): Promise<boolean> {
+    return new Promise((resolve) => {
+        let done = false;
+        let finish = (v: boolean) => {
+            if(!done) { done = true; resolve(v); }
+        };
+        // A tab without our content script never calls back, so bound the wait.
+        setTimeout(()=>finish(false), 600);
+        try {
+            chrome.tabs.sendMessage(tabid, {type: 'ping'}, (res: any) => {
+                finish(!!(res && !res.error));
+            });
+        } catch(e) {
+            finish(false);
+        }
+    });
+}
 
 function get_tabid_and_loadui() {
     let finish = function(d: chrome.tabs.Tab[], how: string) {
@@ -84,6 +110,16 @@ async function loadui() {
             Object.keys(state).filter(k=>k.startsWith('STATS_')).join(',')
         );
         hint_text.textContent = general;
+        // Safari-only: "No stats" does not mean "no player" — the content script
+        // can be alive and merging danmaku while stats have not been produced yet
+        // (fresh reload, or the background fell back to public defaults). Ask the
+        // tab directly instead of showing the misleading "no player found".
+        // Gated on IS_SAFARI so Chrome/Firefox keep their exact existing wording.
+        if(IS_SAFARI)
+            void probe_content_script().then(alive => {
+                if(alive && hint_text.textContent === general)
+                    hint_text.textContent = '扩展已就绪，正在等待弹幕数据';
+            });
         return;
     }
 

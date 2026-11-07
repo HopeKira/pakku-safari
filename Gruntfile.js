@@ -55,55 +55,62 @@ function safari_manifest(src, path) {
     if(path.endsWith('manifest.json')) {
         let obj = JSON.parse(src);
 
-        // Safari doesn't support minimum_chrome_version
+        // Chrome-only field; Safari ignores it and the converter warns about unknown keys.
         delete obj.minimum_chrome_version;
 
-        // Safari doesn't support optional_host_permissions; merge ws/wss into host_permissions
+        // Safari has no optional_host_permissions. Fold ws/wss into host_permissions
+        // so BREAK_UPDATE keeps its grant without a runtime permission request.
         if (obj.optional_host_permissions) {
             obj.host_permissions = obj.host_permissions.concat(obj.optional_host_permissions);
             delete obj.optional_host_permissions;
         }
 
-        // Safari doesn't support declarativeNetRequestWithHostAccess; replace with declarativeNetRequest
         if (obj.permissions) {
-            obj.permissions = obj.permissions.map(function(p) {
-                return p === 'declarativeNetRequestWithHostAccess' ? 'declarativeNetRequest' : p;
-            });
+            // Safari has no chrome.notifications at all: declaring it only produces a
+            // converter warning and an unnecessary permission prompt. The runtime
+            // guards in core/api_support.ts already handle its absence.
+            obj.permissions = obj.permissions
+                .filter(p => p !== 'notifications')
+                .map(p => p === 'declarativeNetRequestWithHostAccess' ? 'declarativeNetRequest' : p);
         }
 
-        // Safari doesn't support service_worker; use persistent background page
+        // Safari opens the options page itself (from its own extension settings);
+        // open_in_tab is Chrome/Firefox-only and the converter warns about it.
+        if (obj.options_ui)
+            delete obj.options_ui.open_in_tab;
+
+        // Safari loads a persistent background page, not a service worker.
         if (obj.background && obj.background.service_worker) {
             obj.background.scripts = [obj.background.service_worker];
             delete obj.background.service_worker;
-            // Safari needs persistent background for reliable message passing
-            // (non-persistent event pages may terminate and miss messages)
         }
 
-        // Safari: inject xhr_hook_injector.js (ISOLATED world) which creates a <script> tag
-        // to load xhr_hook.js into the MAIN world. This is the classic approach that works
-        // everywhere, including Safari which may not support world:'MAIN' in static content_scripts.
-        let xhr_hook_injector_script = {
-            matches: ['*://*.bilibili.com/*'],
-            exclude_matches: [
-                'https://www.bilibili.com/robots.txt?pakku_sandbox',
-                'https://message.bilibili.com/*',
-            ],
-            js: ['/assets/xhr_hook_injector.js'],
-            run_at: 'document_start',
-        };
-        obj.content_scripts.push(xhr_hook_injector_script);
+        // Safari 18+ honours content_scripts[].world = 'MAIN', so xhr_hook.js can be
+        // injected by the browser directly into the page world. The old approach
+        // (an ISOLATED injector that appends a <script src=extension-url> tag) is
+        // subject to the page CSP, costs an extra DOM injection and needs the hook
+        // to be a web-accessible resource. It is still kept for Chrome/Firefox
+        // versions without `world` support, but Safari no longer needs it.
+        const HOOK_MATCHES = ['*://*.bilibili.com/*'];
+        const HOOK_EXCLUDES = [
+            'https://www.bilibili.com/robots.txt?pakku_sandbox',
+            'https://message.bilibili.com/*',
+        ];
 
-        // Also inject the CSS separately
-        let injected_css_script = {
-            matches: ['*://*.bilibili.com/*'],
-            exclude_matches: [
-                'https://www.bilibili.com/robots.txt?pakku_sandbox',
-                'https://message.bilibili.com/*',
-            ],
+        obj.content_scripts.push({
+            matches: HOOK_MATCHES,
+            exclude_matches: HOOK_EXCLUDES,
+            js: ['/generated/xhr_hook.js'],
+            run_at: 'document_start',
+            world: 'MAIN',
+        });
+
+        obj.content_scripts.push({
+            matches: HOOK_MATCHES,
+            exclude_matches: HOOK_EXCLUDES,
             css: ['/generated/injected.css'],
             run_at: 'document_start',
-        };
-        obj.content_scripts.push(injected_css_script);
+        });
 
         return JSON.stringify(obj);
     }

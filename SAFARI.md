@@ -23,9 +23,20 @@ xcrun safari-web-extension-converter dist/S \
 
 ## 当前适配内容
 
-Manifest 变换位于 `Gruntfile.js`：移除 Chrome 特定最低版本字段、调整 DNR 权限和后台脚本形式、添加必要内容脚本和样式。本机 Xcode 27.0 转换器提示 `notifications` 和 `open_in_tab` 不受支持，通知与选项打开方式需要实际验证。实现限于 B 站相关主机；未增加任意网站或 cookie 权限。
+Manifest 变换位于 `Gruntfile.js` 的 `safari_manifest()`：移除 Chrome 专属的 `minimum_chrome_version`、把 optional host 权限并入 `host_permissions`、把 `declarativeNetRequestWithHostAccess` 换成 `declarativeNetRequest`、把 service worker 改成持久化后台页。
 
-后台通信失败或超过 2 秒时使用公共默认设置作为兼容回退，不包含个人导出配置。回退无法获知用户保存的关闭开关，并且使用临时标签编号，因此设置同步和徽标显示存在限制。
+以下两项已从 Safari manifest 中删除，因为它们不受支持且会触发转换器警告：
+
+- `notifications` 权限 —— Safari 没有 `chrome.notifications`，运行时由 `core/api_support.ts` 的守卫兜底
+- `options_ui.open_in_tab` —— 选项页由 Safari 自己从扩展设置中打开，快捷键也在 Safari 设置 → 扩展 中修改（弹窗里的快捷键提示已改为文字说明，不再尝试打开 `chrome://extensions/shortcuts`）
+
+XHR 钩子使用 Safari 18+ 原生支持的 `content_scripts[].world = 'MAIN'` 静态声明，不再通过 ISOLATED 注入器创建 `<script>` 标签。后者受页面 CSP 限制、多一次 DOM 注入，仅为不支持 `world` 的旧 Chrome/Firefox 保留在 `assets/xhr_hook_injector.js`。
+
+⚠️ Xcode 27.2 的转换器会打印 `world 不受支持` 的警告，但这是转换器白名单落后：**它只警告、不删键**，生成的 `Pakku Extension/Resources/manifest.json` 里 `world: "MAIN"` 完整保留，运行时由 Safari 18+ 解析。可据此忽略该警告。若现场验证发现钩子未生效，把 `Gruntfile.js` 里那条声明的 `js` 改回 `/assets/xhr_hook_injector.js` 并去掉 `world` 即可回退。
+
+配置存储：Safari 没有 `storage.sync`，`config.ts` 自动回落到 `storage.local`；`state.ts` 在模拟 session storage 时只清理自己拥有的键，避免误删用户设置。设置不会跨设备同步。
+
+后台通信失败或超过 2 秒时仍会用公共默认配置，但 **tabid 记为 0，不写统计、不发徽标**，弹窗会主动探测内容脚本：脚本存活时显示「扩展已就绪，正在等待弹幕数据」，而不是误报「没有发现B站播放器」。刷新页面即可恢复完整统计。
 
 ## 人工运行检查
 

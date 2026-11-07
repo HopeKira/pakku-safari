@@ -231,14 +231,15 @@ export async function save_config<SomeConfig extends Partial<Config>>(config: So
 
     config._LAST_UPDATE_TIME = gen_timestamp();
     try {
+        let payload = await compress_all(config);
         let store = get_config_store();
         try {
-            await store.set(await compress_all(config));
+            await store.set(payload);
         } catch(e) {
             if(store===chrome.storage.local)
                 throw e;
             mark_sync_unavailable(e);
-            await chrome.storage.local.set(await compress_all(config));
+            await chrome.storage.local.set(payload);
         }
     } catch(e: any) {
         console.error(e);

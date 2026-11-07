@@ -6,6 +6,7 @@ import Permissions = chrome.permissions.Permissions;
 
 const IS_FIREFOX = process.env.PAKKU_CHANNEL==='firefox';
 const IS_EDG = process.env.PAKKU_CHANNEL==='edg';
+const IS_SAFARI = process.env.PAKKU_CHANNEL==='safari';
 const MIN_CHROME_VERSION = 99; // callback for chrome.runtime.sendMessage
 
 let note_container = id('note-banner-container');
@@ -56,7 +57,7 @@ function try_regexp(x: string) {
 
 let version = 'v' + chrome.runtime.getManifest().version;
 let img_btns: NodeListOf<HTMLElement> = document.querySelectorAll('[data-name]');
-id('version').textContent = version + '_' + (IS_FIREFOX ? 'F' : IS_EDG ? 'E' : 'C');
+id('version').textContent = version + '_' + (IS_FIREFOX ? 'F' : IS_EDG ? 'E' : IS_SAFARI ? 'S' : 'C');
 
 function highlighter() {
     if(!location.hash) return;
@@ -115,9 +116,20 @@ if(IS_EDG) {
     ask_review_link.href = 'https://microsoftedge.microsoft.com/addons/detail/pakku%EF%BC%9A%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%BC%B9%E5%B9%95%E8%BF%87%E6%BB%A4%E5%99%A8/lnfcfeidnipnphibahlkdhalpkpmccoc';
     ask_review_link.textContent = 'Microsoft Edge 加载项网站';
 }
+if(IS_SAFARI) {
+    // Locally built Safari extension has no store listing to review.
+    ask_review_link.style.display = 'none';
+}
 
 // version check
 async function ver_check() {
+    // Safari builds are compiled locally: there is no Chrome/Firefox store listing
+    // to poll, no Chromium version to warn about, and no auto-update channel.
+    if(IS_SAFARI) {
+        id('version-checker').textContent = 'Safari 本地构建';
+        return;
+    }
+
     let chrome_ver_match = navigator.userAgent.match(/Chrome\/(\d+)/);
     let chrome_ver = chrome_ver_match ? parseInt(chrome_ver_match[1]) : null;
 

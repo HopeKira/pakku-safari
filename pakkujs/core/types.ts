@@ -95,6 +95,7 @@ export class MessageStats {
     }
 
     notify(tabid: int) {
+        if(!tabid) return this; // unknown tabid (background fallback): never write STATS_0
         save_state({['STATS_'+tabid]: this})
             .then(()=>{
                 const BGCOLORS = {error: '#ff4444', message: '#4444ff'};
@@ -139,6 +140,7 @@ export class Stats {
     num_max_dispval = 0;
 
     notify(tabid: int, config: Config) {
+        if(!tabid) return this; // unknown tabid (background fallback): never write STATS_0
         save_state({['STATS_'+tabid]: this})
             .then(()=>{
                 let text = (

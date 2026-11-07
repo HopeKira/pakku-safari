@@ -1,18 +1,22 @@
 import {install_dnr_rule} from "./danmu_update_blocker";
 import {get_config, hotfix_on_update, save_config} from "./config";
-import {get_state, HAS_SESSION_STORAGE, init_state, save_state} from "./state";
+import {get_state, HAS_SESSION_STORAGE, init_state, save_state, reset_state_store} from "./state";
 import {LocalizedConfig} from "../core/types";
 import {is_permission_buggy, do_fix_permission} from './permission_check';
 
 import {HAS} from '../core/api_support';
 
-// Safari 不实现 chrome.notifications（转换器会丢弃该权限声明），直接访问其属性
-// 会抛 TypeError 并让整个后台脚本停止执行，弹窗也就永远显示「没有发现播放器」。
-// 所有通知相关调用都先做存在性守卫。
+// Safari 不实现 chrome.notifications；Safari manifest 里也已不再声明该权限。
+// 直接访问缺失命名空间的属性会抛 TypeError 并中断整个后台脚本，
+// 所以通知相关调用统一走 HAS.notifications 守卫。
+
+const IS_SAFARI = process.env.PAKKU_CHANNEL==='safari';
 
 async function check_fix_permission() {
-    // Safari 对 chrome.permissions 的支持不完整，缺失时直接跳过，避免后台崩溃
-    if (!HAS.permissions) return;
+    // Safari 在授予扩展时就按 manifest 的 host_permissions 授权，没有 Chrome 那套
+    // 可选的 host 权限修复流程；notifications 也不存在，提示根本发不出来。
+    // 整段在 Safari 构建里会被 rollup/terser 摇掉，不必运行时空转。
+    if (IS_SAFARI || !HAS.permissions) return;
 
     let perms = await chrome.permissions.getAll();
 
@@ -78,8 +82,10 @@ async function install_context_menu() {
 }
 
 async function install_content_script() {
-    // Safari: xhr_hook.js is already statically declared in manifest.json with world: 'MAIN'
-    if(process.env.PAKKU_CHANNEL==='safari')
+    // Safari 18+ supports content_scripts[].world='MAIN' natively: xhr_hook.js is
+    // declared statically in the Safari manifest (see safari_manifest in Gruntfile.js).
+    // No runtime registration (and no scripting permission requirement) is needed.
+    if(IS_SAFARI)
         return;
 
     let installed = await chrome.scripting.getRegisteredContentScripts({
@@ -138,11 +144,15 @@ async function toggle_global_switch() {
     chrome.runtime.sendMessage({type: 'reload_popup_state', tabid: null})
         .catch(()=>{});
     let cur_tabid = (await chrome.tabs.query({active: true, currentWindow: true}))[0]?.id || null;
+    // Safari only exposes tab.url with the "tabs" permission; without it the
+    // url-based filter silently skipped every tab, so toggling the global switch
+    // never refreshed open B站 pages. sendMessage to a tab without our content
+    // script simply rejects and is ignored. Other channels keep their filter.
     for(let tab of await chrome.tabs.query({})) {
-        let url = tab.url;
-        if(url?.includes('bilibili.com/'))
-            chrome.tabs.sendMessage(tab.id!, {type: 'reload_danmu', key: new_switch ? 2 : 1, trigger_player: (tab.id===cur_tabid)})
-                .catch(()=>{});
+        if(!IS_SAFARI && !tab.url?.includes('bilibili.com/'))
+            continue;
+        chrome.tabs.sendMessage(tab.id!, {type: 'reload_danmu', key: new_switch ? 2 : 1, trigger_player: (tab.id===cur_tabid)})
+            .catch(()=>{});
     }
 
     return new_switch;
@@ -162,7 +172,7 @@ chrome.runtime.onStartup.addListener(async ()=>{
 
     if(!HAS_SESSION_STORAGE) {
         console.error('pakku state: EMULATING session storage');
-        await chrome.storage.local.clear();
+        await reset_state_store();
         // redo the init since the state is reset
         await perform_init();
     }
